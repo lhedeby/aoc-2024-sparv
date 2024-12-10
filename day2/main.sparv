@@ -1,0 +1,88 @@
+fun split_line(char) {
+    return fun(string_to_split) {
+        return split(string_to_split, char);
+    };
+}
+
+fun map(f) {
+    return fun(list) {
+        for i in 0:len(list) {
+            list[i] = f(list[i]);
+        }
+        return list;
+    };
+}
+
+fun split_n_parse() {
+    return fun(x) {
+        return split(x, " ")->map(fun(x) parse(x));
+    };
+}
+
+fun remove_from_line(old, to_remove) {
+    var new = [];
+    for i in 0:len(old) {
+        if i != to_remove {
+            new += [old[i]];
+        }
+    }
+    return new;
+}
+
+
+fun test_line(line) {
+    var remove = false;
+    var increasing = true;
+    if line[0] > line[1] {
+        increasing = false;
+    }
+    
+    
+    for i in 1:len(line) {
+        var diff = line[i] - line[i-1];
+        if !increasing {
+            diff = diff * -1;
+        }
+        
+        if diff <= 0 or diff > 3 {
+            return i;
+        }
+    }
+    return nil;
+}
+
+var lines = read_file("aoc/day2/in")->
+split_line("\r\n")->
+map(split_n_parse());
+
+var p1 = 0;
+var p2 = 0;
+
+for line in lines {
+    var safe = test_line(line);
+    if typeof(safe) == "<nil>" {
+        p1 += 1;
+        p2 += 1;
+    }
+    
+    if typeof(safe) == "<number>"{
+        print("not a safe line: " + line);
+        var new_line1 = remove_from_line(line, safe);
+        var new_line2 = remove_from_line(line, safe-1);
+        var new_line3 = remove_from_line(line, safe+1);
+        var new_line4 = remove_from_line(line, 0);
+        var new_line5 = remove_from_line(line, len(line)-1);
+        var t1 = test_line(new_line1);
+        var t2 = test_line(new_line2);
+        var t3 = test_line(new_line3);
+        var t4 = test_line(new_line4);
+        var t5 = test_line(new_line5);
+        if typeof(t1) == "<nil>" or typeof(t2) == "<nil>" or typeof(t3) == "<nil>" or typeof(t4) == "<nil>" or typeof(t5) == "<nil>" {
+            print("did find");
+            p2 += 1;
+        }
+    }
+}
+
+print("p1: " + p1);
+print("p2: " + p2);
