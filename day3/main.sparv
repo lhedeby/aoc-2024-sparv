@@ -1,0 +1,64 @@
+
+fun match(base_str, word, i) {
+    for j in 0:len(word) {
+        if i + j >= len(base_str) or base_str[i + j] != word[j] {
+            return false;
+        }
+    }
+    return true;
+}
+
+fun is_num(base_str, i) {
+    var nums = ["0","1","2","3","4","5","6","7","8","9"];
+    for n in nums {
+        if n == base_str[i] {
+            return true;
+        }
+    }
+    return false;
+}
+
+var s = read_file("aoc/day3/in");
+
+var p1 = 0;
+var p2 = 0;
+
+var p2_enabled = true;
+
+var p = 0;
+
+while p < len(s) {
+    if match(s, "do()", p) {
+        p2_enabled = true;
+    }
+    if match(s, "don't()", p) {
+        p2_enabled = false;
+    }
+
+    if match(s, "mul(", p) {
+        p += 4;
+        var n1 = "";
+        while is_num(s, p) {
+            n1 += s[p];
+            p += 1;
+        }
+        if s[p] == "," {
+            p += 1;
+            var n2 = "";
+            while is_num(s, p) {
+                n2 += s[p];
+                p += 1;
+            }
+            if s[p] == ")" {
+                p1 += parse(n1) * parse(n2);
+                if p2_enabled {
+                    p2 += parse(n1) * parse(n2);
+                }
+            }
+        }
+    }
+    p += 1;
+}
+
+print("p1: " + p1);
+print("p2: " + p2);
