@@ -30,7 +30,7 @@ fun partition(list, lo, hi) {
 
 fun sort(list) {
     for i in 1:len(list) {
-    
+
         var key = list[i];
         var j = i - 1;
         while j >= 0 and list[j] > key {
@@ -49,14 +49,14 @@ fun split_line(char) {
     };
 }
 
-var lines = read_file("aoc/day1/in")->split_line("\r\n");
+var lines =read_file("day1/in")->split_line("\r\n");
 
 var l1 = [];
 var l2 = [];
 
 
 for line in lines {
-    var numbers = split(line, "   ");
+    var numbers = split(line, " ");
     l1 += [parse(numbers[0])];
     l2 += [parse(numbers[1])];
 }

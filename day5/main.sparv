@@ -1,0 +1,137 @@
+
+var lines = fun(s) {
+    return split(s, "\r\n");
+};
+
+var filter = fun(list) {
+    var rules = [];
+    var updates = [];
+    for item in list {
+        if item[2] == "|" {
+            rules += [item];
+        } else {
+            updates += [item];
+        }
+    }
+    return [rules, updates];
+};
+
+fun map(f) {
+    return fun(list) {
+        for i in 0:len(list) {
+            list[i] = f(list[i]);
+        }
+        return list;
+    };
+}
+
+var map_rules = fun(list) {
+    var mapped_rules = [];
+    for item in list[0] {
+        var t = split(item, "|")->map(fun(x) parse(x));
+        mapped_rules += [t];
+    }
+    list[0] = mapped_rules;
+    return list;
+};
+
+var map_updates = fun(list) {
+    var mapped_rules = [];
+    for item in list[1] {
+        var t = split(item, ",")->map(fun(x) parse(x));
+        mapped_rules += [t];
+    }
+    list[1] = mapped_rules;
+    return list;
+};
+
+var find_idx = fun(n, update) {
+    var i = 0;
+    for u in update {
+        if u == n {
+            return i;
+        }
+        i += 1;
+    }
+    return -1;
+};
+
+var test_rule = fun(rule, update) {
+    var first = find_idx(rule[0], update);
+    var second = find_idx(rule[1], update);
+    if first == -1 or second == -1 {
+        return true;
+    }
+    return first < second;
+};
+
+fun quicksort(list, lo, hi, rules) {
+    if lo >= hi or lo < 0 {
+        return nil;
+    }
+
+    var p = partition(list, lo, hi, rules);
+    quicksort(list, lo, p - 1, rules);
+    quicksort(list, p + 1, hi, rules);
+}
+
+fun partition(list, lo, hi, rules) {
+    var pivot = list[hi];
+    var i = lo;
+
+    for j in lo:hi {
+        if is_less(list[j], pivot, rules) {
+            var temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
+            i += 1;
+        }
+    }
+    var temp = list[i];
+    list[i] = list[hi];
+    list[hi] = temp;
+    return i;
+}
+
+fun is_less(v1, v2, rules) {
+    for rule in rules {
+        if rule[0] == v1 and rule[1] == v2 {
+            return true;
+        }
+    }
+    return false;
+}
+
+var sort_update = fun(update, rules) {
+    quicksort(update, 0, len(update)-1, rules);
+};
+
+var solve = fun(list) {
+    var p1 = 0;
+    var p2 = 0;
+    for update in list[1] {
+        var ok = true;
+        for rule in list[0] {
+            ok = test_rule(rule, update) and ok;
+        }
+
+        if ok {
+            p1 += update[(len(update)-1)/2];
+        } else {
+            sort_update(update, list[0]);
+            p2 += update[(len(update)-1)/2];
+        }
+    }
+    print("p1: " + p1);
+    print("p2: " + p2);
+};
+
+
+
+
+read_file("day5/in")->
+    lines->
+    filter->
+    map_rules->
+    map_updates->
+    solve;

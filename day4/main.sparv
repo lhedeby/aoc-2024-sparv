@@ -1,0 +1,68 @@
+fun search_p1(i, j, grid, dir, width, height, c, word) {
+    while c < len(word) {
+        if grid[i][j] != word[c] {
+            return false;
+        }
+        c += 1;
+        i += dir[0];
+        j += dir[1];
+        if c != len(word) and (i == height or i < 0 or j == width or j < 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+fun search_p2(i, j, grid, width, height) {
+    if i < 1 or j < 1 or i >= height-1 or j >= width-1 or grid[i][j] != "A" {
+        return false;
+    }
+    if 
+        (grid[i-1][j-1] == "M" and grid[i+1][j+1] == "S" and grid[i-1][j+1] == "M" and grid[i+1][j-1] == "S") or
+        (grid[i-1][j-1] == "M" and grid[i+1][j+1] == "S" and grid[i-1][j+1] == "S" and grid[i+1][j-1] == "M") or
+        (grid[i-1][j-1] == "S" and grid[i+1][j+1] == "M" and grid[i-1][j+1] == "M" and grid[i+1][j-1] == "S") or
+        (grid[i-1][j-1] == "S" and grid[i+1][j+1] == "M" and grid[i-1][j+1] == "S" and grid[i+1][j-1] == "M") {
+        return true;
+    }
+    return false;
+}
+
+var lines = fun(s) {
+    return split(s, "\r\n");
+};
+
+var grid = read_file("day4/in")->lines;
+
+var height = len(grid);
+var width = len(grid[0]);
+
+var dirs = [
+    [ 1,  0],
+    [ 1,  1],
+    [ 0,  1],
+    [-1,  1],
+    [-1,  0],
+    [-1, -1],
+    [ 0, -1],
+    [ 1, -1]
+];
+
+var p1 = 0;
+var p2 = 0;
+
+for i in 0:height {
+    for j in 0:width {
+        for dir in dirs {
+            if search_p1(i, j, grid, dir, width, height, 0, "XMAS") {
+                p1 += 1;
+            }
+        }
+        if search_p2(i, j, grid, width, height) {
+            p2 += 1;
+        }
+    }
+}
+
+print("p1: " + p1);
+print("p2: " + p2);
+

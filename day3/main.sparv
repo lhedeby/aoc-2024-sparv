@@ -18,7 +18,7 @@ fun is_num(base_str, i) {
     return false;
 }
 
-var s = read_file("aoc/day3/in");
+var s = read_file("day3/in");
 
 var p1 = 0;
 var p2 = 0;
