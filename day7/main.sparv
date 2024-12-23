@@ -1,0 +1,70 @@
+fun lines(s) split(s, "\r\n")
+
+fun solve_lines(lines) {
+    var p1 = 0;
+    var p2 = 0;
+    for line in lines {
+        if solve(line, 1, line[1][0], true) {
+            p1 += line[0];
+        }
+        if solve(line, 1, line[1][0], false) {
+            p2 += line[0];
+        }
+    }
+    print("p1: " + p1);
+    print("p2: " + p2);
+}
+
+fun solve(line, i, sum, is_p1) {
+    if sum > line[0] {
+        return false;
+    }
+    if i == len(line[1]) {
+        return sum == line[0];
+    }
+    var psum = sum + line[1][i];
+    var plus = solve(
+        line,
+        i + 1,
+        sum + line[1][i],
+        is_p1
+    );
+
+    var msum = sum * line[1][i];
+    var mult = solve(line, i + 1, msum, is_p1);
+
+    if is_p1 {
+        return plus or mult;
+    }
+
+    var csum = parse(sum + "" + line[1][i]);
+    var conc = solve(line, i + 1, csum, is_p1);
+
+    return plus or mult or conc;
+}
+
+
+fun parse_lines(lines) {
+    var res = [];
+    for line in lines {
+        var s = split(line, ": ");
+        var lhs = parse(s[0]);
+        var rhs = [];
+        for n in split(s[1], " ") {
+            rhs += [parse(n)];
+        }
+        res += [[lhs, rhs]];
+    }
+    return res;
+}
+
+
+
+
+
+
+var input = read_file("day7/in") ->
+    lines ->
+    parse_lines ->
+    solve_lines;
+
