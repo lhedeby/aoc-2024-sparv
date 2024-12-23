@@ -1,5 +1,5 @@
 
-fun match(base_str, word, i) {
+fun match_word(base_str, word, i) {
     for j in 0:len(word) {
         if i + j >= len(base_str) or base_str[i + j] != word[j] {
             return false;
@@ -28,14 +28,14 @@ var p2_enabled = true;
 var p = 0;
 
 while p < len(s) {
-    if match(s, "do()", p) {
+    if match_word(s, "do()", p) {
         p2_enabled = true;
     }
-    if match(s, "don't()", p) {
+    if match_word(s, "don't()", p) {
         p2_enabled = false;
     }
 
-    if match(s, "mul(", p) {
+    if match_word(s, "mul(", p) {
         p += 4;
         var n1 = "";
         while is_num(s, p) {
