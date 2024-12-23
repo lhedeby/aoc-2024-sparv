@@ -7,7 +7,7 @@ import os
 # and regression testing.
 
 def main():
-    proj_path = "../krax/src/krax.csproj"
+    proj_path = "../krax/src/sparv.csproj"
 
     subprocess.run(["dotnet", "build", proj_path, "-o", "./"], shell=True, capture_output=True)
 
@@ -43,7 +43,7 @@ def test_file(path: str):
     answer = file.read().splitlines()
 
     
-    output = subprocess.run(["krax.exe", path + "/main.sparv"], shell=True, capture_output=True)
+    output = subprocess.run(["sparv.exe", path + "/main.sparv"], shell=True, capture_output=True)
     actual = output.stdout.decode('utf-8').splitlines()
 
     error = answer[0] != actual[1] or answer[1] != actual[2]
@@ -58,12 +58,12 @@ def test_file(path: str):
 
 def clean():
     files_to_delete = [
-        "krax",
-        "krax.deps.json",
-        "krax.dll",
-        "krax.exe",
-        "krax.pdb",
-        "krax.runtimeconfig.json"
+        "sparv",
+        "Sparv.deps.json",
+        "Sparv.dll",
+        "Sparv.exe",
+        "Sparv.pdb",
+        "Sparv.runtimeconfig.json"
     ]
     for file in files_to_delete:
         if os.path.isfile(file):
