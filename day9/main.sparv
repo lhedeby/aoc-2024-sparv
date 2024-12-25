@@ -1,0 +1,100 @@
+fun reverse(list) {
+    var res = [];
+    var i = len(list) - 1;
+    while i >= 0 {
+        res += [list[i]];
+        i -= 1;
+    }
+    return res;
+}
+fun lines(s) split(s, "\r\n")
+fun to_number(list) {
+    var res = [];
+    for i in list {
+        res += [parse(i)];
+    }
+    return res;
+}
+var input = read_file("day9/in")->lines;
+input = to_number(input[0]);
+
+// p2
+var empties = [];
+var files = [];
+var ppp = 0;
+var is_file = true;
+var t_id = 0;
+for i in input {
+    if is_file {
+        files += [{start: ppp, end: ppp + i, id: t_id}];
+        t_id += 1;
+    } else {
+        empties += [{start: ppp, end: ppp + i}];
+    }
+    ppp += i;
+    is_file = !is_file;
+}
+fun try_move(file, empties_list) {
+    var f_size = file.end - file.start;
+    for e in empties_list {
+        if e.start >= f.start {
+            return nil;
+        }
+        var e_size = e.end - e.start;
+        if e_size >= f_size {
+            file.start = e.start;
+            file.end = e.start + f_size;
+            e.start = file.end;
+            return nil;
+        }
+    }
+}
+
+for f in files->reverse {
+    try_move(f, empties);
+}
+var p2 = 0;
+for f in files {
+    for i in f.start:f.end {
+        p2 += i * f.id;
+    }
+}
+
+// p1
+
+
+var lp = 0;
+var l_id = 0;
+var rp = len(input) - 1;
+var r_id = (len(input) - 1) / 2;
+var pos = 0;
+
+var p1 = 0;
+while lp <= rp {
+    if lp % 2 == 0 {
+        while input[lp] > 0 {
+            var points = pos * l_id;
+            p1 += pos * l_id;
+            pos += 1;
+            input[lp] = input[lp]-1;
+        }
+        l_id += 1;
+    } else {
+        while input[lp] > 0 {
+            if input[rp] > 0 {
+                var points = r_id * pos;
+                p1 += r_id * pos;
+                pos += 1;
+                input[rp] = input[rp] - 1;
+                input[lp] = input[lp] - 1;
+            } else {
+                r_id -= 1;
+                rp -= 2;
+            }
+        }
+    }
+    lp += 1;
+}
+
+print("p1: " + p1);
+print("p2: " + p2);
