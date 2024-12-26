@@ -1,0 +1,57 @@
+var input = read_file("day10/in") -> fun(s) split(s, "\r\n");
+
+fun test_trail(input, i, j, level) {
+    if i < 0 or j < 0 or i >= len(input) or j >= len(input[0]) {
+        return [];
+    }
+    if input[i][j] == "." {
+        return [];
+    }
+    if parse(input[i][j]) - level != 1 {
+        return [];
+    }
+    if input[i][j] == "9" {
+        return [i, j];
+    }
+    var s = [];
+    s += test_trail(input, i - 1, j, level+1);
+    s += test_trail(input, i + 1, j, level+1);
+    s += test_trail(input, i, j + 1, level+1);
+    s += test_trail(input, i, j - 1, level+1);
+    return s;
+}
+
+var i = 0;
+var p1 = 0;
+var p2 = 0;
+
+for line in input {
+    var j = 0;
+    for c in line {
+        if c == "0" {
+            var res = [];
+            var t = test_trail(input, i, j, -1);
+            p2 += len(t) / 2;
+            var ii = 0;
+            while ii < len(t) {
+                var exists = false;
+                for r in res {
+                    if r[0] == t[ii] and r[1] == t[ii+1] {
+                        exists = true;
+                    }
+                }
+                if !exists {
+                    res += [[t[ii], t[ii+1]]];
+                }
+                ii += 2;
+            }
+            p1 += len(res);
+        }
+        j += 1;
+    }
+    i += 1;
+}
+
+print("p1: " + p1);
+print("p2: " + p2);
+
