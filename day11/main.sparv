@@ -1,0 +1,77 @@
+fun parse_list(list) {
+    for i in 0:len(list) {
+        list[i] = parse(list[i]);
+    }
+
+    return list;
+}
+
+fun blink(n, blinks, cache) {
+    if blinks == 0 {
+        return 1;
+    }
+    var key = n + "_" + blinks;
+    if cache.[key] != nil {
+        return cache.[key];
+    }
+    var res = nil;
+    if n == 0 {
+        res = blink(1, blinks-1, cache);
+    }
+    var s = "" + n;
+    var l = len(s);
+    if res == nil and l % 2 == 0 {
+        var first = "";
+        var second = "";
+        for i in 0:l {
+            if i < l/2 {
+                first += s[i];
+            } else {
+                second += s[i];
+            }
+        }
+
+        res = blink(parse(first), blinks-1, cache) + blink(parse(second), blinks-1, cache);
+    }
+    if res == nil {
+        res = blink(n*2024, blinks-1, cache);
+    }
+    cache.[key] = res;
+    return res;
+
+}
+
+fun map(f) fun(list) {
+    for i in 0:len(list) {
+        list[i] = f(list[i]);
+    }
+    return list;
+}
+fun sum(list) {
+    var res = 0;
+    for i in list {
+        res += i;
+    }
+    return res;
+}
+
+var cache = {
+    
+};
+
+split(read_file("day11/in") ->
+    fun(s) split(s, "\r\n")[0], " ") ->
+    map(fun(x) parse(x))->
+    map(fun(x) blink(x, 25, cache))->
+    sum->
+    fun(x) print("p1: " + x);
+
+
+split(read_file("day11/in") ->
+    fun(s) split(s, "\r\n")[0], " ") ->
+    map(fun(x) parse(x))->
+    map(fun(x) blink(x, 75, cache))->
+    sum->
+    fun(x) print("p2: " + x);
+
+
