@@ -1,0 +1,184 @@
+fun map(f) fun(list) {
+    for i in 0:len(list) {
+        list[i] = f(list[i]);
+    }
+    return list;
+}
+
+
+
+fun is_oob(pos, width, height) 
+    pos.i < 0 or 
+    pos.j < 0 or
+    pos.i >= height or
+    pos.j >= width
+
+fun flood_fill(map, pos, key, v, res) {
+    var pos_s = [pos.i, pos.j]->to_key;
+    if is_oob(pos, len(map), len(map[0])){
+        return nil;
+    }
+    if map[pos.i][pos.j] != key {
+        return nil;
+    }
+    if v.[pos_s] != nil {
+        return nil;
+    }
+    v.[pos_s] = true;
+    res.keys += [pos_s];
+    res.map.[pos_s] = pos;
+    var dirs = [
+        { i: pos.i+1, j: pos.j  },
+        { i: pos.i-1, j: pos.j  },
+        { i: pos.i  , j: pos.j+1},
+        { i: pos.i  , j: pos.j-1}
+    ];
+    for d in dirs {
+        flood_fill(map, d, key, v, res);
+    }
+}
+
+fun calc_area(o) len(o.keys)
+
+fun calc_perim(o) {
+    var total = 0;
+    for key in o.keys {
+        var perim = 4;
+        var pos = o.map.[key];
+        var dirs = [
+            [pos.i+1, pos.j]->to_key,
+            [pos.i-1, pos.j]->to_key,
+            [pos.i, pos.j+1]->to_key,
+            [pos.i, pos.j-1]->to_key
+        ];
+        for d in dirs {
+            if o.map.[d] != nil {
+                perim -= 1;
+            }
+        }
+        total += perim;
+    }
+    return total;
+}
+
+fun min(m1, m2) {
+    if m1 == nil or m2 < m1 {
+        return m2;
+    }
+    return m1;
+}
+fun max(m1, m2) {
+    if m1 == nil or m2 > m1 {
+        return m2;
+    }
+    return m1;
+}
+
+fun to_key(list) list[0]+","+list[1]
+
+fun calc_sides(o) {
+    var min_i = nil;
+    var max_i = nil;
+    var min_j = nil;
+    var max_j = nil;
+    for key in o.keys {
+        min_i = min(min_i, o.map.[key].i);
+        max_i = max(max_i, o.map.[key].i);
+        min_j = min(min_j, o.map.[key].j);
+        max_j = max(max_j, o.map.[key].j);
+    }
+    var sides = 0;
+    // top/bot
+    for i in min_i:(max_i+1) {
+        var top_side = false;
+        var bot_side = false;
+        for j in min_j:(max_j+1) {
+            var k = [i,j]->to_key;
+            var k_u = [i-1,j]->to_key;
+            var k_d = [i+1,j]->to_key;
+            if o.map.[k] != nil {
+                if o.map.[k_u] == nil {
+                    if !top_side {
+                        sides += 1;
+                    }
+                    top_side = true;
+                } else {
+                    top_side = false;
+                }
+                if o.map.[k_d] == nil {
+                    if !bot_side {
+                        sides += 1;
+                    }
+                    bot_side = true;
+                } else {
+                    bot_side = false;
+                }
+            } else {
+                top_side = false;
+                bot_side = false;
+            }
+        }
+    }
+
+    for j in min_j:(max_j+1) {
+        var l_side = false;
+        var r_side = false;
+        for i in min_i:(max_i+1) {
+            var k = [i,j]->to_key;
+            var k_l = [i,j-1]->to_key;
+            var k_r = [i,j+1]->to_key;
+            if o.map.[k] != nil {
+                if o.map.[k_l] == nil {
+                    if !l_side {
+                        sides += 1;
+                    }
+                    l_side = true;
+                } else {
+                    l_side = false;
+                }
+                if o.map.[k_r] == nil {
+                    if !r_side {
+                        sides += 1;
+                    }
+                    r_side = true;
+                } else {
+                    r_side = false;
+                }
+            } else {
+                l_side = false;
+                r_side = false;
+            }
+        }
+    }
+    return sides;
+}
+
+fun cost_p1(o) calc_area(o) * calc_perim(o)
+fun cost_p2(o) calc_area(o) * calc_sides(o)
+
+var input = read_file("day12/in") ->
+    fun(s) split(s, "\r\n");
+
+
+var v = {};
+var p1 = 0;
+var p2 = 0;
+for i in 0:len(input) {
+    for j in 0:len(input[i]) {
+        var key = input[i][j];
+        var res = {
+            keys: [],
+            map: {},
+        };
+
+        flood_fill(input, {i: i, j: j}, key, v, res);
+        
+        if (res.keys->len) > 0 {
+            p1 += cost_p1(res);
+            p2 += cost_p2(res);
+        }
+    }
+}
+
+print("p1: " + p1);
+print("p2: " + p2);
