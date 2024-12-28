@@ -1,0 +1,48 @@
+var input = read_file("day13/in") ->
+    fun(s) split(s, "\r\n");
+
+fun parse_line(input, s1, s2) split(split(input, s1)[0], s2)->to_number
+
+fun to_number(list) {
+    for i in 0:len(list) {
+        list[i] = parse(list[i]);
+    }
+    return list;
+}
+
+fun solve(a, b, p) {
+    var det = a[0]*b[1]-b[0]*a[1];
+    if det == 0 {
+        return nil;
+    }
+    var x = (b[1] * p[0] - b[0] * p[1])/det;
+    var y = ((-a[1]) * p[0] + a[0] * p[1])/det;
+    if x % 1 != 0 or y % 1 != 0 or x < 0 or y < 0 {
+        return nil;
+    }
+    return [x, y];
+}
+
+var i = 0;
+var p1 = 0;
+var p2 = 0;
+
+while i < len(input) {
+    var a = parse_line(input[i], "Button A: X+", ", Y+");
+    i+=1;
+    var b = parse_line(input[i], "Button B: X+", ", Y+");
+    i+=1;
+    var p = parse_line(input[i], "Prize: X=", ", Y=");
+    i+=1;
+    var res1 = solve(a,b,p);
+    if res1 != nil {
+        p1 += res1[0] * 3 + res1[1];
+    }
+    var res2 = solve(a,b,[p[0]+10000000000000, p[1]+10000000000000]);
+    if res2 != nil {
+        p2 += res2[0] * 3 + res2[1];
+    }
+}
+print("p1: " + p1);
+print("p2: " + p2);
+
