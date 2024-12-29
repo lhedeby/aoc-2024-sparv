@@ -1,0 +1,126 @@
+fun parse_robot(r) {
+    var s = split(split(r, "p=")[0], " v=");
+    var p = split(s[0], ",");
+    var v = split(s[1], ",");
+    return {
+        px: parse(p[0]),
+        py: parse(p[1]),
+
+        vx: parse(v[0]),
+        vy: parse(v[1]),
+    };
+}
+fun parse_robots(list) {
+    for i in 0:len(list) {
+        list[i] = parse_robot(list[i]);
+    }
+    return list;
+}
+
+fun move_robots(width, height, count) fun(robots) {
+    for i in 0:count {
+        var bots = {};
+        for robot in robots {
+            robot.px += robot.vx;
+            robot.py += robot.vy;
+            if robot.px < 0 {
+                robot.px += width;
+            }
+            if robot.px >= width {
+                robot.px -= width;
+            }
+
+            if robot.py < 0 {
+                robot.py += height;
+            }
+            if robot.py >= height {
+                robot.py -= height;
+            }
+            bots.[robot.px+","+robot.py] = true;
+        }
+        // used this heuristic to print images when robots align
+        // for p2
+        //var should_print = false;
+        //for i in 0:height {
+        //    var count = 0;
+        //    for j in 0:width {
+        //        if bots.[j+","+i] {
+        //            count+=1;
+        //        } else {
+        //            count = 0;
+        //        }
+        //        if count > 5 {
+        //            should_print = true;
+        //        }
+        //    }
+        //}
+        //
+        //if should_print {
+        //    print_robots(width, height)(robots);
+        //    read_input();
+        //}
+
+        //print("i: " + i);
+    }
+    return robots;
+}
+
+fun print_robots(width, height) fun(list) {
+    for i in 0:height {
+        var line = "";
+        for j in 0:width {
+            var c = 0;
+            for r in list {
+                if r.px == j and r.py == i {
+                    c+=1;
+                }
+            }
+            if c == 0 {
+                line += ".";
+            } else {
+                line += "" + c;
+            }
+        }
+        print(line);
+    }
+    return list;
+}
+
+fun robot_count(min_i, max_i, min_j, max_j, robots) {
+    var count = 0;
+    for i in min_i:max_i {
+        for j in min_j:max_j {
+            for r in robots {
+                if r.py == i and r.px == j {
+                    count += 1;
+                }
+            }
+        }
+    }
+    return count;
+}
+
+fun calc_safety_factor(width, height) fun(list) {
+    var q1 = robot_count(0, (height-1)/2, 0, (width-1)/2, list);
+    var q2 = robot_count(0, (height-1)/2, (width+1)/2, width, list);
+    var q3 = robot_count((height+1)/2, height, 0, (width-1)/2, list);
+    var q4 = robot_count((height+1)/2, height, (width+1)/2, width, list);
+    return q1*q2*q3*q4;
+}
+
+var width = 101;
+var height = 103;
+
+var robots = read_file("day14/in") ->
+    fun(s) split(s, "\r\n") ->
+    parse_robots ->
+    move_robots(width, height, 100) ->
+    calc_safety_factor(width, height) ->
+    fun(x) print("p1: " + x);
+// solved this by looking visually
+print("p2: 7687");
+    
+
+
+
+
