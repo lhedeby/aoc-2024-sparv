@@ -1,0 +1,187 @@
+fun parse_state(list) {
+    var state = {
+        room: [],
+        ins: "",
+        pos: nil,
+    };
+    var start_line = nil;
+    var reading_ins = false;
+    for i in list {
+
+        if reading_ins {
+            state.ins += i;
+        } else {
+            var res = [];
+            for ii in i {
+                res += [ii];
+            }
+            state.room += [res];
+        }
+        if i == start_line {
+            reading_ins = true;
+        }
+        if start_line == nil {
+            start_line = i;
+        }
+    }
+    return state;
+}
+
+fun find_start(state) {
+    var i = 0;
+    for line in state.room {
+        var j = 0;
+        for c in line {
+            if c == "@" {
+                state.pos = [i, j];
+                return state;
+            }
+            j += 1;
+        }
+        i += 1;
+    }
+    print("!unreachable");
+}
+
+fun move(state, dir, pos) {
+    if state.room[pos[0]][pos[1]] == "." {
+        return true;
+    }
+    if state.room[pos[0]][pos[1]] == "#" {
+        return false;
+    }
+    var new_pos = [pos[0]+dir[0], pos[1]+dir[1]];
+    var can_move = move(state, dir, new_pos);
+    if can_move {
+        state.room[new_pos[0]][new_pos[1]] = state.room[pos[0]][pos[1]];
+        if state.room[pos[0]][pos[1]] == "@" {
+            state.pos = new_pos;
+            state.room[pos[0]][pos[1]] = ".";
+        }
+    }
+    return can_move;
+}
+
+fun gps_sum(prefix) fun (state) {
+    var sum = 0;
+    for i in 0:(state.room->len) {
+        for j in 0:(state.room[0]->len) {
+            if state.room[i][j] == "O" or state.room[i][j] == "[" {
+                sum += 100 * i + j;
+            }
+        }
+    }
+    print(prefix+sum);
+}
+
+fun movement(state) {
+    for i in state.ins {
+        var dir = match i {
+            "<"    | [ 0,-1],
+            "v"    | [ 1, 0],
+            "^"    | [-1, 0],
+            ">"    | [ 0, 1],
+        };
+        move(state, dir, state.pos,);
+    }
+    return state;
+}
+
+fun movement_p2(state) {
+    for i in state.ins {
+        var dir = match i {
+            "<"    | [ 0,-1],
+            "v"    | [ 1, 0],
+            "^"    | [-1, 0],
+            ">"    | [ 0, 1],
+        };
+        var moves = move_p2(state, dir, state.pos, [], false);
+        if moves != nil {
+            var c = {};
+            var prev = ".";
+            var ml = len(moves);
+            for i in 0:ml {
+                var m = moves[ml-1-i];
+                if c.[m[0][0]+","+m[0][1]] == nil {
+                    c.[m[0][0]+","+m[0][1]] = true;
+                    state.room[m[1][0]][m[1][1]] = state.room[m[0][0]][m[0][1]];
+                    state.room[m[0][0]][m[0][1]] = ".";
+                }
+            }
+            state.pos = moves[0][1];
+        }
+    }
+    return state;
+}
+
+// rsm = rock side move;
+fun move_p2(state, dir, pos, moves, is_rsm) {
+    var curr = state.room[pos[0]][pos[1]];
+    if curr == "." {
+        return moves;
+    }
+    if curr == "#" {
+        return nil;
+    }
+
+    var new_pos = [pos[0]+dir[0], pos[1]+dir[1]];
+    moves += [[pos, new_pos]];
+    var can_move = move_p2(state, dir, new_pos, moves, false);
+    if can_move == nil {
+        return nil;
+    }
+    if dir[0] != 0 and !is_rsm{
+        if curr == "[" {
+            var rock_move = move_p2(state, dir, [pos[0], pos[1]+1], moves, true);
+            if rock_move == nil {
+                return nil;
+            }
+        }
+
+        if curr == "]" {
+            var rock_move = move_p2(state, dir, [pos[0], pos[1]-1], moves, true);
+            if rock_move == nil {
+                return nil;
+            }
+        }
+    }
+    return moves;
+}
+
+fun expand_room(state) {
+    for i in 0:len(state.room) {
+        var new_line = [];
+        for c in state.room[i] {
+            var new = match c {
+                "#" | ["#","#"],
+                "O" | ["[","]"],
+                "." | [".","."],
+                "@" | ["@","."],
+            };
+            new_line += new;
+        }
+        state.room[i] = new_line;
+    }
+    return state;
+}
+
+read_file("day15/in") ->
+    fun(s) split(s, "\r\n") ->
+    parse_state ->
+    find_start ->
+    movement ->
+    gps_sum("p1: ");
+
+read_file("day15/in") ->
+    fun(s) split(s, "\r\n") ->
+    parse_state ->
+    expand_room ->
+    find_start ->
+    movement_p2 ->
+    gps_sum("p2: ");
+
+
+
+
+
+
