@@ -1,0 +1,69 @@
+fun solve(bytes, amount_of_bytes) {
+    var b = { };
+
+    for i in 0:amount_of_bytes {
+        b.[bytes[i]] = true;
+    }
+
+    var grid_size = 71;
+
+    var rows = [];
+    for i in 0:grid_size {
+        var new_row = [];
+        for j in 0:grid_size {
+            if b.[j+","+i] == nil {
+                new_row += ["."];
+            } else {
+                new_row += ["#"];
+            }
+        }
+        rows += [new_row];
+    }
+
+    rows[0][0] = 0;
+    var list = [[0, 0]];
+    var counter = 1;
+    while (list->len)>0 {
+            var new_list = [];
+        for l in list {
+            var i = l[0];
+            var j = l[1];
+            if i > 0 and rows[i-1][j] == "." {
+                rows[i-1][j] = counter;
+                new_list += [[i-1, j]];
+            }
+            if j > 0 and rows[i][j-1] == "." {
+                rows[i][j-1] = counter;
+                new_list += [[i, j-1]];
+            }
+            if i < len(rows) - 1 and rows[i+1][j] == "." {
+                rows[i+1][j] = counter;
+                new_list += [[i+1, j]];
+            }
+
+            if j < len(rows[0]) - 1 and rows[i][j+1] == "." {
+                rows[i][j+1] = counter;
+                new_list += [[i, j+1]];
+            }
+        }
+        list = new_list;
+        counter += 1;
+    }
+    return rows[len(rows)-1][len(rows)-1];
+}
+
+var bytes = read_file("day18/in") ->
+    fun(s) split(s, "\r\n");
+// brute forcing at its finest
+for i in 0:len(bytes) {
+    var ans = solve(bytes, i);
+    if i == 1024 {
+        print("p1: " + ans);
+    }
+    if ans == "." {
+        print("p2: " + bytes[i-1]);
+        return nil;
+    }
+}
+
+
