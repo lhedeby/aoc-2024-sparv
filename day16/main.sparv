@@ -1,0 +1,170 @@
+fun fake_heap() {
+    var root = {
+        value: -1,
+        next: nil,
+    };
+    var o = {
+        insert: fun(item) {
+            var t = root;
+            var done = false;
+            while !done {
+                if t.next == nil {
+                    done = true;
+                } else {
+                    if t.next.value.p > item.p {
+                        done = true;
+                    } else {
+                        t = t.next;
+                    }
+                }
+            }
+            var temp = t.next;
+            t.next = {
+                value: item,
+                next: temp,
+                o: o,
+            };
+        },
+        get_array: fun() {
+            var array = [];
+            if root.next == nil {
+                return nil;
+            }
+            var t = root.next;
+            while t.next != nil {
+                array += [t.value];
+                t = t.next;
+            }
+            array += [t.value];
+            return array;
+        },
+        pop_low: fun() {
+            var temp = root.next.value;
+            root.next = root.next.next;
+            return temp;
+        }
+    };
+    return o;
+}
+
+fun parse_state(list) {
+    var state = {
+        map: [],
+        pos: nil,
+        end: nil,
+    };
+    var i = 0;
+    for line in list {
+        var j = 0;
+        var res = [];
+        for c in line {
+            if c == "S" {
+                state.pos = [i, j];
+                res += ["."];
+            }
+            if c == "E" {
+                state.end = [i, j];
+                res += ["."];
+            }
+            if c != "S" and c != "E" {
+                res += [c];
+            }
+            j+=1;
+        }
+        state.map += [res];
+        i += 1;
+    }
+    return state;
+}
+
+fun print_map(state) {
+    for line in state.map {
+        var l = "";
+        for c in line {
+            l += c;
+        }
+        print(l);
+    }
+    return state;
+}
+fun cache_key(pos, dir) pos[0]+","+pos[1]+":"+dir
+
+fun rotate(d) {
+    if d > 3 {
+        return d-4;
+    }
+    if d < 0 {
+        return d+4;
+    }
+    return d;
+}
+
+fun new_pos(pos, dir) [pos[0] + dir[0], pos[1] + dir[1]]
+
+fun djik(map, start, dir, end) {
+    var dirs = [
+        [0,1],
+        [1,0],
+        [0,-1],
+        [-1,0]
+    ];
+
+    var cache = {};
+    var q = fake_heap();
+    q.insert({pos: start, dir: dir, p: 0});
+
+    var winning_seats = {};
+    var win_score = nil;
+    while true {
+        var node = q.pop_low();
+
+        if node.pos[0] == end[0] and node.pos[1] == end[1] {
+            if win_score == nil {
+                win_score = node.p;
+            }
+            if node.p > win_score {
+                print("p1: " + win_score);
+                winning_seats->len->fun(x) print("p2: " + (x+1));
+                return nil;
+            }
+            var n = node;
+            while n.prev != nil {
+                n = n.prev;
+                winning_seats.[cache_key(n.pos, [0, 0])] = true;
+            }
+
+        }
+        var c_k = cache_key(node.pos, node.dir);
+        if cache.[c_k] == nil or cache.[c_k] >= node.p {
+            cache.[c_k] = node.p;
+            var new_moves = [];
+            var ld = rotate(node.dir-1);
+            var rd = rotate(node.dir+1);
+
+            var test_left = new_pos(node.pos, dirs[ld]);
+            if map[test_left[0]][test_left[1]] == "." {
+                q.insert({pos: node.pos, dir: ld, p: node.p+1000, prev: node});
+            }
+            var test_right = new_pos(node.pos, dirs[rd]);
+            if map[test_right[0]][test_right[1]] == "." {
+                q.insert({pos: node.pos, dir: rd, p: node.p+1000, prev: node});
+            }
+            var new_pos = new_pos(node.pos, dirs[node.dir]);
+            if map[new_pos[0]][new_pos[1]] == "." {
+                q.insert({pos: new_pos, dir: node.dir, p: node.p+1, prev: node});
+            }
+        }
+    }
+
+}
+
+fun solve(state) {
+    djik(state.map, state.pos, 0, state.end);
+}
+
+var n = read_file("day16/in") ->
+    fun(s) split(s, "\r\n")->
+    parse_state->
+    solve;
+
+
