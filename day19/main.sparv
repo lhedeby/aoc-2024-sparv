@@ -1,0 +1,58 @@
+fun is_match(p, t1, t2) {
+    if p + len(t2) > len(t1) {
+        return false;
+    }
+    for i in 0:len(t2) {
+        if t1[p+i] != t2[i] {
+            return false;
+        }
+    }
+    return true;
+}
+
+fun test_towel(map, towel, p, cache) {
+    if cache.[""+p] != nil {
+        return cache.[""+p];
+    }
+    if p == len(towel) {
+        return 1;
+    }
+    if map.[towel[p]] == nil {
+        return 0;
+    }
+    var res = 0;
+    for t in map.[towel[p]] {
+        if is_match(p, towel, t) {
+            var temp = test_towel(map, towel, p + len(t), cache);
+            res += temp;
+            cache.[""+(p+len(t))] = temp;
+        }
+    }
+    return res;
+}
+
+var towels = read_file("day19/in") ->
+    fun(s) split(s, "\r\n");
+
+var t_map = {};
+
+for t in split(towels[0], ", ") {
+    if t_map.[t[0]] == nil {
+        t_map.[t[0]] = [];
+    }
+
+    t_map.[t[0]] += [t];
+}
+
+var p1 = 0;
+var p2 = 0;
+for i in 1:len(towels) {
+    var res = test_towel(t_map, towels[i], 0, {});
+    if res > 0 {
+        p1 += 1; 
+        p2 += res;
+    }
+}
+print("p1: " + p1);
+print("p2: " + p2);
+
