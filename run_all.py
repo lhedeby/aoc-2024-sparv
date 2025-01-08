@@ -1,6 +1,8 @@
 import subprocess
 from os import listdir
 import os
+import time
+import threading
 
 # A script to run all of the solutions.
 # Will later be used be used for benchmarks
@@ -26,6 +28,17 @@ def main():
         print_ok("All tests Ok!")
     clean()
 
+def timer(stop_timer, path):
+    start_time = time.time()
+    elapsed = 0
+    try:
+        while not stop_timer.is_set():
+            time.sleep(0.1)  # Update every 0.1 seconds
+            elapsed = time.time() - start_time
+            print(f"{path}     {elapsed:.1f} seconds", end="\r")
+    except KeyboardInterrupt:
+        pass
+
 def test_file(path: str):
     """
         runs the main.sparv file and compares it to the ans
@@ -43,8 +56,19 @@ def test_file(path: str):
     answer = file.read().splitlines()
 
     
-    output = subprocess.run(["sparv.exe", path + "/main.sparv"], shell=True, capture_output=True)
-    actual = output.stdout.decode('utf-8').splitlines()
+    stop_timer = threading.Event()
+    try:
+        timer_thread = threading.Thread(target=timer, args=(stop_timer, path,))
+        timer_thread.start()
+
+        output = subprocess.run(["sparv.exe", path + "/main.sparv"], shell=True, capture_output=True)
+        actual = output.stdout.decode('utf-8').splitlines()
+
+    except KeyboardInterrupt:
+        print("Program interrupted")
+    finally:
+        stop_timer.set()
+        timer_thread.join()
 
     error = answer[0] != actual[1] or answer[1] != actual[2]
     
