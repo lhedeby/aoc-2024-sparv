@@ -31,7 +31,7 @@ var lines = fun(s) {
     return split(s, "\r\n");
 };
 
-var grid = read_file("day4/in")->lines;
+var grid = read_file("day04/in")->lines;
 
 var height = len(grid);
 var width = len(grid[0]);

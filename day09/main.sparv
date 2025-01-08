@@ -15,7 +15,7 @@ fun to_number(list) {
     }
     return res;
 }
-var input = read_file("day9/in")->lines;
+var input = read_file("day09/in")->lines;
 input = to_number(input[0]);
 
 // p2

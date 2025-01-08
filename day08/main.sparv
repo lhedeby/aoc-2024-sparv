@@ -92,7 +92,7 @@ fun find_anti_nodes_p2(antennas) {
 
 
 
-var input = read_file("day8/in") ->
+var input = read_file("day08/in") ->
     lines;
 
 input->

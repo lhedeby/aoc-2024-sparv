@@ -1,3 +1,5 @@
+
+
 fun parse_state(list) {
     var state = {
         room: [],
@@ -165,6 +167,7 @@ fun expand_room(state) {
     return state;
 }
 
+
 read_file("day15/in") ->
     fun(s) split(s, "\r\n") ->
     parse_state ->
@@ -179,9 +182,3 @@ read_file("day15/in") ->
     find_start ->
     movement_p2 ->
     gps_sum("p2: ");
-
-
-
-
-
-

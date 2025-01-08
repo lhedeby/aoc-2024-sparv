@@ -15,7 +15,7 @@ fun map(f) {
 
 fun split_n_parse() {
     return fun(x) {
-        return split(x, " ")->map(fun(x) parse(x));
+        return split(x, " ")->map(fun(y) parse(y));
     };
 }
 
@@ -51,7 +51,7 @@ fun test_line(line) {
     return nil;
 }
 
-var lines = read_file("day2/in")->
+var lines = read_file("day02/in")->
 split_line("\r\n")->
 map(split_n_parse());
 

@@ -129,7 +129,7 @@ var solve = fun(list) {
 
 
 
-read_file("day5/in")->
+read_file("day05/in")->
     lines->
     filter->
     map_rules->

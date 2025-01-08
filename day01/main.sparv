@@ -49,7 +49,7 @@ fun split_line(char) {
     };
 }
 
-var lines =read_file("day1/in")->split_line("\r\n");
+var lines =read_file("day01/in")->split_line("\r\n");
 
 var l1 = [];
 var l2 = [];

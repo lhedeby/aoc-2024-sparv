@@ -1,0 +1,168 @@
+fun lines(s) {
+    return split(s, "\r\n");
+}
+
+
+fun find_start(map) {
+    var i = 0;
+    for row in map {
+        for j in 0:len(row) {
+            if row[j] == "^" {
+                return [i, j];
+            }
+        }
+        i += 1;
+    }
+}
+
+fun move(pos, dir) {
+    return [pos[0] + dir[0], pos[1] + dir[1]];
+}
+
+fun is_oob(map, pos) {
+    return 
+    pos[0] < 0 or 
+    pos[1] < 0 or
+    pos[0] >= len(map) or
+    pos[1] >= len(map[0]);
+}
+
+fun move_forward_to_rock_or_oob(map, pos, dir) {
+    var curr_pos = [pos[0], pos[1]];
+    var new_pos = move(curr_pos, dir);
+    if (is_oob(map, new_pos)) {
+        return [new_pos, nil];
+    } 
+    if (map[new_pos[0]][new_pos[1]] == "#") {
+        return [curr_pos, true];
+    }
+    return [new_pos, false];
+}
+
+fun move_forward_to_rock_or_oob2(map, pos, dir) {
+    var curr_pos = [pos[0], pos[1]];
+    var new_pos = move(curr_pos, dir);
+    if (is_oob(map, new_pos)) {
+        return [new_pos, nil];
+    } 
+    if (map[new_pos[0]][new_pos[1]] == "#") {
+        return [curr_pos, true];
+    }
+    return [new_pos, false];
+}
+
+fun add_if_not_already(list, el) {
+    for item in list {
+        if item[0] == el[0] and item[1] == el[1] {
+            return list;
+        }
+    }
+    list += [el];
+    return list;
+}
+
+var dirs = [
+    [-1, 0],
+    [ 0, 1],
+    [ 1, 0],
+    [ 0, -1]
+];
+
+// [6, 4]
+// [6, 6]
+// [7, 6]
+// [8, 2]
+// [8, 4]
+// [8, 7]
+
+fun in_loop_visited(list, new, d) {
+    for i in list {
+        if i[0] == new[0] and i[1] == new[1] and i[2] == d {
+            return true;
+        }
+    }
+    return false;
+}
+
+fun test_loop(map, start_pos, start_dir) {
+    var curr_pos2 = [[start_pos[0], start_pos[1]], nil];
+    var curr_dir = (start_dir + 1) % 4;
+    var loop_visited = [[start_pos[0], start_pos[1], start_dir]];
+
+
+    while (true) {
+        var d = dirs[curr_dir];
+        var res = move_forward_to_rock_or_oob2(map, curr_pos2[0], d);
+
+        //if res[0][0] == start_pos[0] and res[0][1] == start_pos[1] and curr_dir == start_dir {
+            //print("res" + res[0] + " d: " + curr_dir);
+            
+
+            //print("testing loop");
+            //for i in loop_visited {
+                //print("loop: " + i);
+                //print("comparing: " + i[0] + " == " + res[0][0]);
+                //print("comparing: " + i[1] + " == " + res[0][1]);
+                //print("comparing: " + i[2] + " == " + curr_dir);
+                //if i[0] == res[0][0] and i[1] == res[0][1] and i[2] == curr_dir {
+                    //return true;
+                //}
+            //}
+            //print("visited" + loop_visited);
+        //}
+        if in_loop_visited(loop_visited, res[0], curr_dir) {
+            return true;
+        }
+        if res[1] == nil {
+            return false;
+        } else {
+            loop_visited += [[res[0][0], res[0][1], curr_dir]];
+            if res[1] {
+                curr_dir = (curr_dir + 1) % 4;
+            } else {
+                curr_pos2 = res;
+            }
+        }
+    }
+}
+
+
+
+var map = read_file("day06/test")->
+    lines;
+var start = [find_start(map), nil];
+
+
+
+var curr_dir = 0;
+
+var done = false;
+
+var visited = [start[0]];
+
+var loops = 0;
+
+while (!done) {
+    var test = test_loop(map, start[0], curr_dir);
+    if test {
+        loops += 1;
+        //print("loop at" + start[0]);
+    }
+    var res = move_forward_to_rock_or_oob(map, start[0], dirs[curr_dir]);
+    if res[1] == nil {
+        start = res;
+        done = true;
+    } else {
+        if res[1] {
+            curr_dir = (curr_dir + 1) % 4;
+        } else {
+            visited = add_if_not_already(visited, res[0]);
+            start = res;
+        }
+    }
+}
+print("p1: " + len(visited));
+print("loop: " + loops);
+
+
+

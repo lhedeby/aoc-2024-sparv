@@ -63,7 +63,7 @@ fun parse_lines(lines) {
 
 
 
-var input = read_file("day7/in") ->
+var input = read_file("day07/in") ->
     lines ->
     parse_lines ->
     solve_lines;
