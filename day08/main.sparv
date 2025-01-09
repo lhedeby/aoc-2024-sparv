@@ -34,7 +34,7 @@ fun remove_dupes(list) {
 fun find_antennas(list) {
     var i = 0;
     var antennas = [];
-    for line in input {
+    for line in list {
         var j = 0;
         for c in line {
             if c != "." {
