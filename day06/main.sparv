@@ -1,7 +1,4 @@
-fun lines(s) {
-    return split(s, "\r\n");
-}
-
+fun lines(s) split(s, "\r\n")
 
 fun find_start(map) {
     var i = 0;
@@ -15,154 +12,196 @@ fun find_start(map) {
     }
 }
 
-fun move(pos, dir) {
-    return [pos[0] + dir[0], pos[1] + dir[1]];
-}
-
-fun is_oob(map, pos) {
-    return 
-    pos[0] < 0 or 
-    pos[1] < 0 or
-    pos[0] >= len(map) or
-    pos[1] >= len(map[0]);
-}
-
-fun move_forward_to_rock_or_oob(map, pos, dir) {
-    var curr_pos = [pos[0], pos[1]];
-    var new_pos = move(curr_pos, dir);
-    if (is_oob(map, new_pos)) {
-        return [new_pos, nil];
-    } 
-    if (map[new_pos[0]][new_pos[1]] == "#") {
-        return [curr_pos, true];
-    }
-    return [new_pos, false];
-}
-
-fun move_forward_to_rock_or_oob2(map, pos, dir) {
-    var curr_pos = [pos[0], pos[1]];
-    var new_pos = move(curr_pos, dir);
-    if (is_oob(map, new_pos)) {
-        return [new_pos, nil];
-    } 
-    if (map[new_pos[0]][new_pos[1]] == "#") {
-        return [curr_pos, true];
-    }
-    return [new_pos, false];
-}
-
-fun add_if_not_already(list, el) {
+fun filter(f) fun(list) {
+    var res = [];
     for item in list {
-        if item[0] == el[0] and item[1] == el[1] {
-            return list;
+        if f(item) {
+            res += [item];
         }
     }
-    list += [el];
-    return list;
+    return res;
 }
 
-var dirs = [
-    [-1, 0],
-    [ 0, 1],
-    [ 1, 0],
-    [ 0, -1]
-];
-
-// [6, 4]
-// [6, 6]
-// [7, 6]
-// [8, 2]
-// [8, 4]
-// [8, 7]
-
-fun in_loop_visited(list, new, d) {
-    for i in list {
-        if i[0] == new[0] and i[1] == new[1] and i[2] == d {
-            return true;
+fun insert(item, list, n) {
+    var new = [];
+    var added = false;
+    for l in list {
+        if !added and item[n] < l[n] {
+            new += [[item[0], item[1]]];
+            added = true;
         }
+        new += [l];
     }
-    return false;
+    if !added {
+        new += [[item[0], item[1]]];
+    }
+    return new;
 }
 
-fun test_loop(map, start_pos, start_dir) {
-    var curr_pos2 = [[start_pos[0], start_pos[1]], nil];
-    var curr_dir = (start_dir + 1) % 4;
-    var loop_visited = [[start_pos[0], start_pos[1], start_dir]];
 
+fun pos_to_key(pos) pos[0]+":"+pos[1]
+fun posdir_to_key(pos, dir) pos[0]+":"+pos[1]+";"+dir[0]+":"+dir[1]
+fun rotate(pos) [pos[1], -pos[0]]
+fun move(pos, dir) [pos[0] + dir[0], pos[1] + dir[1]]
+fun is_rock(map, pos) !is_oob(map, pos) and map[pos[0]][pos[1]] == "#"
 
-    while (true) {
-        var d = dirs[curr_dir];
-        var res = move_forward_to_rock_or_oob2(map, curr_pos2[0], d);
+fun is_oob(map, pos)
+        pos[0] < 0 or 
+        pos[1] < 0 or
+        pos[0] >= len(map) or
+        pos[1] >= len(map[0])
 
-        //if res[0][0] == start_pos[0] and res[0][1] == start_pos[1] and curr_dir == start_dir {
-            //print("res" + res[0] + " d: " + curr_dir);
-            
-
-            //print("testing loop");
-            //for i in loop_visited {
-                //print("loop: " + i);
-                //print("comparing: " + i[0] + " == " + res[0][0]);
-                //print("comparing: " + i[1] + " == " + res[0][1]);
-                //print("comparing: " + i[2] + " == " + curr_dir);
-                //if i[0] == res[0][0] and i[1] == res[0][1] and i[2] == curr_dir {
-                    //return true;
-                //}
-            //}
-            //print("visited" + loop_visited);
-        //}
-        if in_loop_visited(loop_visited, res[0], curr_dir) {
-            return true;
-        }
-        if res[1] == nil {
-            return false;
-        } else {
-            loop_visited += [[res[0][0], res[0][1], curr_dir]];
-            if res[1] {
-                curr_dir = (curr_dir + 1) % 4;
-            } else {
-                curr_pos2 = res;
+fun mmm(map) {
+    var res = {};
+    var width = len(map[0]);
+    var height = len(map);
+    for i in 0:height {
+        var row_key = "row:" + i;
+        var row_list = [];
+        for j in 0:width {
+            if map[i][j] == "#" {
+                row_list += [[i, j]];
             }
         }
+        res.[row_key] = row_list;
+    }
+    for j in 0:width {
+        var col_key = "col:" + j;
+        var col_list = [];
+        for i in 0:height {
+            if map[i][j] == "#" {
+                col_list += [[i, j]];
+            }
+        }
+        res.[col_key] = col_list;
+    }
+    return res;
+}
+fun mmm_test(o, n_pos, n_dir) {
+    var visited = {};
+    var pos = [n_pos[0], n_pos[1]];
+    var dir = [n_dir[0], n_dir[1]];
+    while true {
+        var key = posdir_to_key(pos, dir);
+        if visited.[key] {
+            return true;
+        }
+        visited.[key] = true;
+        // moving down
+        if dir[0] == 1 {
+            var l = o.["col:" + pos[1]];
+            var n = 0;
+            while n < len(l) and l[n][0] < pos[0] {
+                n += 1;
+            }
+            if n >= len(l) {
+                return false;
+            }
+            pos[0] = l[n][0] - dir[0];
+        }
+
+        // moving up
+        if dir[0] == -1 {
+            var l = o.["col:" + pos[1]];
+            var n = len(l)-1;
+            while n >= 0 and l[n][0] > pos[0] {
+                n -= 1;
+            }
+            if n < 0 {
+                return false;
+            }
+            pos[0] = l[n][0] - dir[0];
+        }
+
+        // moving right
+        if dir[1] == 1 {
+            var l = o.["row:" + pos[0]];
+            var n = 0;
+            while n < len(l) and l[n][1] < pos[1] {
+                n += 1;
+            }
+            if n >= len(l) {
+                return false;
+            }
+            pos[1] = l[n][1] - dir[1];
+        }
+
+        // moving left
+        if dir[1] == -1 {
+            var l = o.["row:" + pos[0]];
+            var n = len(l)-1;
+            while n >= 0 and l[n][1] > pos[1] {
+                n -= 1;
+            }
+            if n < 0 {
+                return false;
+            }
+            pos[1] = l[n][1] - dir[1];
+        }
+        dir = rotate(dir);
     }
 }
 
+fun mmm_add(o, new) {
+    var row_key = "row:" + new[0];
+    var col_key = "col:" + new[1];
+    var row = o.[row_key];
+    var col = o.[col_key];
 
+    o.[row_key] = insert(new, row, 1);
+    o.[col_key] = insert(new, col, 0);
+}
 
-var map = read_file("day06/test")->
-    lines;
-var start = [find_start(map), nil];
+fun mmm_remove(o, new) {
+    var row_key = "row:" + new[0];
+    var col_key = "col:" + new[1];
+    var row = o.[row_key];
+    var col = o.[col_key];
+    o.[row_key] = o.[row_key]->filter(fun(x) x[1] != new[1]);
+    o.[col_key] = o.[col_key]->filter(fun(x) x[0] != new[0]);
+}
 
-
-
-var curr_dir = 0;
-
-var done = false;
-
-var visited = [start[0]];
-
-var loops = 0;
-
-while (!done) {
-    var test = test_loop(map, start[0], curr_dir);
-    if test {
-        loops += 1;
-        //print("loop at" + start[0]);
-    }
-    var res = move_forward_to_rock_or_oob(map, start[0], dirs[curr_dir]);
-    if res[1] == nil {
-        start = res;
-        done = true;
-    } else {
-        if res[1] {
-            curr_dir = (curr_dir + 1) % 4;
+fun solve(map, pos, dir) {
+    var visited = {};
+    var p2 = 0;
+    var move_map_test = mmm(map);
+    while !is_oob(map, pos) {
+        visited.[pos->pos_to_key] = true;
+        var new_pos = move(pos, dir);
+        if is_rock(map, new_pos) {
+            dir = dir->rotate;
         } else {
-            visited = add_if_not_already(visited, res[0]);
-            start = res;
+            if !visited.[new_pos->pos_to_key] and !is_oob(map, new_pos){
+                mmm_add(move_map_test, new_pos);
+                if mmm_test(move_map_test, pos, dir) {
+                    p2 += 1;
+                }
+                mmm_remove(move_map_test, new_pos);
+            }
+            pos = new_pos;
         }
     }
+    visited->len->fun(x) print("p1: " + x);
+    p2->fun(x) print("p2: " + x);
 }
-print("p1: " + len(visited));
-print("loop: " + loops);
+
+fun to_map(list) {
+    var res = [];
+    for row in list {
+        var new_row = [];
+        for c in row {
+            new_row += [c];
+        }
+        res += [new_row];
+    }
+    return res;
+}
+
+var map = read_file("day06/in")->
+    lines->to_map;
+var start = find_start(map);
+
+solve(map, start, [-1, 0]);
 
 
 
