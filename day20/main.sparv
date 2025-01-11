@@ -1,91 +1,106 @@
-
 var map = read_file("day20/in") ->
     fun(s) split(s, "\r\n");
 
-var curr = nil;
-var end = nil;
-for i in 0:len(map) {
-    var new_row = [];
-    for j in 0:len(map[i]) {
-        var c = map[i][j];
-        if c == "S" {
-            curr = [i, j];
-        }
-        if c == "E" {
-            end = [i, j];
-        }
-        new_row += [map[i][j]];
-    }
-    map[i] = new_row;
-
+fun pos(i, j) {
+    return {
+        i: i,
+        j: j,
+    };
 }
 
-for row in map {
-    print(row);
-}
-print("curr:" + curr);
-
-var dirs = [
-    [0, 1],
-    [1, 0],
-    [0, -1],
-    [-1, 0]
-];
-
-
-var positions = [];
-var mm = {};
-
-print("end" + end);
-
-var counter = 0;
-while curr[0] != end[0] or curr[1] != end[1] {
-    positions += [curr];
-    map[curr[0]][curr[1]] = counter;
-    mm.[curr[0]+":"+curr[1]] = counter;
-    var chosen_dir = nil;
-    for d in dirs {
-        if map[curr[0]+d[0]][curr[1]+d[1]] == "." or map[curr[0]+d[0]][curr[1]+d[1]] == "E"{
-            chosen_dir = d;
-        }
-    }
-    curr = [curr[0]+chosen_dir[0], curr[1]+chosen_dir[1]];
-    counter += 1;
-}
-
-map[curr[0]][curr[1]] = counter;
-mm.[curr[0]+":"+curr[1]] = counter;
-
-var p1 = 0;
-//for p in positions {
-//    for d in dirs {
-//        if map[p[0]+d[0]][p[1]+d[1]] == "#" and mm.[(p[0]+(d[0]*2))+":"+(p[1]+(2*d[1]))] != nil {
-//            var f1 = mm.[(p[0]+(d[0]*2))+":"+(p[1]+(2*d[1]))];
-//            var f2 = map[p[0]][p[1]];
-//            var diff =  f1-f2 ;
-//            if diff >= 102 {
-//                p1+=1;
-//            }
+//var curr = nil;
+//for i in 0:len(map) {
+//    var new_row = [];
+//    for j in 0:len(map[i]) {
+//        var c = map[i][j];
+//    new_row += [map[i][j]];
+//    if c == "S" {
+//        curr = pos(i, j);
+//        new_row[j] = ".";
+//        }
+//        if c == "E" {
+//            new_row[j] = ".";
 //        }
 //    }
+//    map[i] = new_row;
 //}
 
+fun remap(o) {
+    for i in 0:len(o.map) {
+        var new_row = [];
+        for j in 0:len(o.map[i]) {
+            var c = o.map[i][j];
+            new_row += [o.map[i][j]];
+            if c == "S" {
+                new_row[j] = ".";
+            }
+            if c == "E" {
+                new_row[j] = ".";
+            }
+        }
+        map[i] = new_row;
+    }
+    return o;
+}
 
-for ii in 0:(len(positions)) {
-    var pos1 = positions[ii];
-//for pos1 in positions {
-    print(pos1);
-    //for pos2 in positions {
-    for jj in (ii+1):len(positions) {
-        var pos2 = positions[jj];
-        var diff = abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1]);
-        if diff == 2 {
-            var d2 = abs(mm.[pos1[0]+":"+pos1[1]] - mm.[pos2[0]+":"+pos2[1]]);
-            if d2 >= 100 {
-                p1+=1;
+fun find_start(o) {
+    for i in 0:len(o.map) {
+        for j in 0:len(o.map[i]) {
+            if o.map[i][j] == "S" {
+                o.start = {i: i, j: j};
+                return o;
             }
         }
     }
 }
 
-print("p1: " + p1);
+fun to_list(o) {
+    var current = o.start;
+    var list = [];
+    var p = 0;
+    while current {
+        map[current.i][current.j] = p;
+        list += [{i: current.i, j: current.j, p: p}];
+        p += 1;
+        current = find_dot(current, map);
+    }
+    o.list = list;
+    return o;
+}
+
+fun solve(text, cheat_distance) fun(o) {
+    var count = 0;
+    for a in 0:(len(o.list)-100) {
+        var b = a+100;
+        while b < len(o.list) {
+            var distance = abs(o.list[a].i - o.list[b].i) + abs(o.list[a].j - o.list[b].j);
+            if distance <= cheat_distance and (abs(o.list[a].p - o.list[b].p) - distance) >= 100 {
+                count += 1;
+            }
+            if distance <= cheat_distance {
+                b += 1;
+            } else {
+                b += distance - cheat_distance;
+            }
+        }
+    }
+    print(text + ": " + count);
+    return o;
+}
+
+
+fun find_dot(p, map) match "." {
+    map[p.i + 1][p.j] | pos(p.i+1, p.j),
+    map[p.i - 1][p.j] | pos(p.i-1, p.j),
+    map[p.i][p.j + 1] | pos(p.i, p.j+1),
+    map[p.i][p.j - 1] | pos(p.i, p.j-1),
+}
+
+{map: map}          ->
+    find_start      ->
+    remap           ->
+    to_list         ->
+    solve("p1", 2)  ->
+    solve("p2", 20)
+;
+
