@@ -1,0 +1,114 @@
+fun i_moves(i) {
+    if i > 0 {
+        return "v" * abs(i);
+    }
+    if i < 0 {
+        return "^" * abs(i);
+    }
+    return "";
+}
+
+fun j_moves(j) {
+    if j > 0 {
+        return ">" * abs(j);
+    }
+    if j < 0 {
+        return "<" * abs(j);
+    }
+    return "";
+}
+
+fun filter_A(code) {
+    var res = "";
+    for c in code {
+        if c != "A" {
+            res += c;
+        }
+    }
+    return res;
+}
+
+fun expand(keypad, prev, next) {
+    var start = nil;
+    var goal = nil;
+    for i in 0:len(keypad) {
+        for j in 0:len(keypad[i]) {
+            if keypad[i][j] == prev {
+                start = {i: i, j: j};
+            }
+            if keypad[i][j] == next {
+                goal = {i: i, j: j};
+            }
+        }
+    }
+    var i_diff = goal.i-start.i;
+    var j_diff = goal.j-start.j;
+    var i_moves = i_moves(i_diff);
+    var j_moves = j_moves(j_diff);
+    if j_diff > 0 {
+        if keypad[start.i+i_diff][start.j] == nil {
+            return j_moves + i_moves;
+        }
+        return i_moves + j_moves;
+    }
+    if j_diff <= 0 {
+        if keypad[start.i][start.j+j_diff] == nil {
+            return i_moves + j_moves;
+        }
+        return j_moves + i_moves;
+    }
+}
+
+fun recur(keypad, code, cache, depth) {
+    var cache_key = code + ":" + depth;
+    if cache.[cache_key] {
+        return cache.[cache_key];
+    }
+    if depth == 0 {
+        return len(code);
+    }
+    var sum = 0;
+    code = "A" + code;
+    for n in 1:len(code) {
+        var new_code = expand(keypad, code[n-1], code[n]) + "A";
+        sum += recur(keypad, new_code, cache, depth-1);
+    }
+    cache.[cache_key] = sum;
+    return sum;
+}
+fun expand_first(keypad, code) {
+    var res = "";
+    code = "A" + code;
+    for n in 1:len(code) {
+        res += expand(keypad, code[n-1], code[n]) + "A";
+    }
+    return res;
+}
+
+var codes = read_file("day21/in") ->
+    fun(s) split(s, "\r\n");
+
+var keypad1 = [
+    ["7", "8", "9"],
+    ["4", "5", "6"],
+    ["1", "2", "3"],
+    [nil, "0", "A"]
+];
+
+var keypad2 = [
+    [nil, "^", "A"],
+    ["<", "v", ">"]
+];
+
+var p1 = 0;
+var p2 = 0;
+
+var cache = {};
+for code in codes {
+    var nums = code->filter_A->parse;
+    var first = expand_first(keypad1, code);
+    p1 += recur(keypad2, first, cache, 2 ) * nums;
+    p2 += recur(keypad2, first, cache, 25) * nums;
+}
+print("p1: " + p1);
+print("p2: " + p2);
