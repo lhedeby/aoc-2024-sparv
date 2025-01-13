@@ -1,0 +1,69 @@
+fun trunc(n) {
+    var split = split(n + "", ".");
+    if len(split) == 2 {
+        return split[0]->parse;
+    }
+    return n;
+}
+
+fun next_secret_number(n, count, all, all_keys) {
+    var i = 0;
+    var changes = [];
+    var values = [];
+    loop count {
+        var s1 = n + "";
+        var n2 = n*64;
+        n = xor(n, n2);
+        n = n % 16777216;
+
+        var a = trunc(n/32);
+        n = xor(n, a);
+        n = n % 16777216;
+
+        var b = n * 2048;
+        n = xor(n, b);
+        n = n % 16777216;
+
+        var s2 = n + "";
+        changes += [parse(s2[len(s2)-1]) - parse(s1[len(s1)-1])];
+        values += [parse(s2[len(s2)-1])];
+    }
+    var added = {};
+    for i in 3:len(changes) {
+        var key = "" + changes[i-3] +  changes[i-2] +  changes[i-1] +  changes[i];
+        if !added.[key] {
+            if all.[key] {
+                all.[key] += [values[i]];
+            } else {
+                all.[key] = [values[i]];
+                all_keys += [key];
+            }
+            added.[key] = true;
+        }
+    }
+    return n;
+}
+
+var numbers = read_file("day22/in") ->
+    fun(s) split(s, "\r\n");
+
+var p1 = 0;
+var all_keys = [];
+var all = {};
+for number in numbers {
+    p1 += next_secret_number(parse(number), 2000, all, all_keys);
+}
+var max = -1;
+for key in all_keys {
+    var sum = 0;
+    for s in all.[key] {
+        sum += s;
+    }
+    if sum > max {
+        max = sum;
+    }
+}
+print("p1: " + p1);
+print("p2: " + max);
+
+
