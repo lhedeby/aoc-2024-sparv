@@ -1,0 +1,106 @@
+fun find_loop(M, start, curr, depth, has_t, ans) {
+    if depth == 0 {
+        if start == curr and has_t {
+            ans[0] = ans[0] + 1;
+        }
+        return nil;
+    }
+    for conn in M.[curr] {
+        if conn != curr {
+            find_loop(M, start, conn, depth-1, has_t or conn[0] == "t", ans);
+        }
+    }
+}
+
+fun try_build_group(M, new, list, visited, groups) {
+    if visited.[new] {
+        return nil;
+    }
+    var new_list = M.[new];
+    var count = len(list);
+
+    for i in list {
+        for n in new_list {
+            if i == n {
+                count -= 1;
+            }
+        }
+    }
+    visited.[new] = true;
+
+    if count <= 0 {
+        for nn in new_list {
+            if !visited.[nn] {
+                try_build_group(M, nn, list + [new], visited, groups);
+            }
+        }
+    } else {
+        groups += [list];
+    }
+}
+
+fun find_biggest(groups) {
+    var biggest_i = -1;
+    var biggest = -1;
+    for i in 0:len(groups) {
+        if len(groups[i]) > biggest {
+            biggest_i = i;
+            biggest = len(groups[i]);
+        }
+    }
+    return groups[biggest_i];
+}
+fun group_to_string(group) {
+    var res = "";
+    var delim = "";
+    for item in group {
+        res += delim + item;
+        delim = ",";
+    }
+    return res;
+}
+
+var connections = read_file("day23/in") ->
+    fun(s) split(s, "\r\n");
+
+
+var M = {};
+var C = [];
+for c in connections {
+    var s = split(c, "-");
+
+    if !M.[s[0]] {
+        M.[s[0]] = [];
+        C += [s[0]];
+    }
+    M.[s[0]] += [s[1]];
+
+    if !M.[s[1]] {
+        M.[s[1]] = [];
+        C += [s[1]];
+    }
+    M.[s[1]] += [s[0]];
+}
+
+var p1 = [0];
+for c in C {
+    find_loop(M, c, c, 3, c[0] == "t", p1);
+}
+
+
+var groups = [];
+for c in C {
+    var group = M.[c];
+    var list = [c];
+    for g in group {
+        try_build_group(M, g, list, {c: true}, groups);
+    }
+}
+
+var group = groups->find_biggest;
+sort(group);
+
+
+print("p1: " + p1[0]/6);
+print("p2: " + group_to_string(group));
+
