@@ -1,4 +1,3 @@
-
 fun match_word(base_str, word, i) {
     for j in 0:len(word) {
         if i + j >= len(base_str) or base_str[i + j] != word[j] {

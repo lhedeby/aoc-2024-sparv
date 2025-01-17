@@ -26,30 +26,7 @@ fun partition(list, lo, hi) {
     return i;
 }
 
-
-
-fun sort(list) {
-    for i in 1:len(list) {
-
-        var key = list[i];
-        var j = i - 1;
-        while j >= 0 and list[j] > key {
-            list[j+1] = list[j];
-            j = j - 1;
-        }
-        list[j+1] = key;
-    }
-    return list;
-}
-
-
-fun split_line(char) {
-    return fun(string_to_split) {
-        return split(string_to_split, char);
-    };
-}
-
-var lines =read_file("day01/in")->split_line("\r\n");
+var lines = read_file("day01/in")->lines;
 
 var l1 = [];
 var l2 = [];
