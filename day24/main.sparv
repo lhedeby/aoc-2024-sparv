@@ -1,0 +1,193 @@
+// tried a bunch of things, ended up visually finding 
+// the errors so answer for p2 is hardcoded.
+// TODO: Clean up this mess
+var input = read_file("day24/in") ->
+    fun(s) split(s, "\r\n");
+
+var nodes = {};
+var x = [];
+var y = [];
+var outputs = [];
+var gates = [];
+for i in input {
+    var test = split(i, ": ");
+    if len(test) == 2 {
+        nodes.[test[0]] = {value: parse(test[1])};
+        if test[0][0] == "x" {
+            x += [test[0]];
+        } else {
+            y += [test[0]];
+        }
+    } else {
+        var split = split(i, " ");
+        if split[4][0] == "z" {
+            outputs += [split[4]];
+        }
+        var gate = {
+            op: split[1],
+            lhs: split[0],
+            rhs: split[2],
+        };
+
+        nodes.[split[4]] = gate;
+        gates += [[split[4], gate]];
+    }
+}
+
+fun resolve_node(node_id, nodes, depth, over) {
+    if depth > 100 {
+        over.flow = true;
+        return nil;
+    }
+    var node = nodes.[node_id];
+    if node.op {
+        var lhs = resolve_node(node.lhs, nodes, depth+1, over);
+        var rhs = resolve_node(node.rhs, nodes, depth+1, over);
+        if node.op == "AND" {
+            if lhs == 1 and rhs == 1 {
+                return 1;
+            }
+            return 0;
+        }
+        if node.op == "OR" {
+            if lhs == 1 or rhs == 1 {
+                return 1;
+            }
+            return 0;
+        }
+        if node.op == "XOR" {
+            if lhs == 1 and rhs == 0 {
+                return 1;
+            }
+            if lhs == 0 and rhs == 1 {
+                return 1;
+            }
+            return 0;
+        }
+   }
+    return node.value;
+}
+
+fun find_nodes(node_id, nodes, res) {
+    var node = nodes.[node_id];
+        res += [node_id];
+    if node.op {
+        //res += [node_id];
+        find_nodes(node.lhs, nodes, res);
+        find_nodes(node.rhs, nodes, res);
+    }
+}
+
+fun to_bin(l, nodes) {
+    var res = "";
+    var over = {flow: false};
+    for i in 0:len(l) {
+        res += ""+ resolve_node(l[len(l)-i-1], nodes, 0, over);
+        if over.flow {
+            return nil;
+        }
+
+    }
+    return res;
+}
+fun to_num(l) {
+    var ans = 0;
+    var mult = 1;
+    for o in l {
+        ans += resolve_node(o, nodes, 0, {}) * mult;
+        mult = mult * 2;
+    }
+    return ans;
+}
+
+sort(outputs);
+//print(x);
+var n1 = to_num(x);
+var n2 = to_num(y);
+
+print("p1: " + to_num(outputs));
+
+fun find_err(qwe, asd) {
+    var zzz = nil;
+    var s = "";
+    for i in 0:len(asd) {
+        if qwe[i] != asd[i] {
+            zzz = i;
+            s += "^";
+        } else {
+            s += " ";
+        }
+    }
+    return zzz;
+}
+
+fun test_foo(idx, x, y, outputs, nodes, list_ans) {
+    var b1 = to_bin(outputs, nodes);
+    var t1 = false;
+    var t2 = false;
+    var t3 = false;
+    var t4 = false;
+    if b1 {
+        t1 = find_err(to_bin(outputs, nodes), list_ans);
+    }
+    nodes.[x[idx]].value = 1;
+    list_ans[len(list_ans) - 1 - idx] = "1";
+    var b2 = to_bin(outputs, nodes);
+    if b2 {
+        t2 = find_err(b2, list_ans);
+    }
+    nodes.[x[idx]].value = 0;
+    nodes.[y[idx]].value = 1;
+    var b3 = to_bin(outputs, nodes);
+    if b3 {
+        t3 = find_err(to_bin(outputs, nodes), list_ans);
+    }
+    nodes.[x[idx]].value = 1;
+    list_ans[len(list_ans) - 1 - idx] = "0";
+    list_ans[len(list_ans) - 2 - idx] = "1";
+    var b4 = to_bin(outputs, nodes);
+    if b4 {
+        t4 = find_err(to_bin(outputs, nodes), list_ans);
+    }
+    list_ans[len(list_ans) - 2 - idx] = "0";
+    nodes.[x[idx]].value = 0;
+    nodes.[y[idx]].value = 0;
+    if t1 or t2 or t3 or t4 {
+        return true;
+    }
+    return false;
+}
+
+
+var visited = {};
+// used this to print and then sketched the diagram to find the errors
+for o in outputs {
+    var r = [];
+    find_nodes(o, nodes, r);
+    // print("=== " + o + " ===");
+    for rr in r {
+        if !visited.[rr] {
+            // print(rr + " : " + nodes.[rr]);
+        }
+        visited.[rr] = true;
+    }
+    // read_input();
+}
+// === swaps ===
+//x05 AND y05 -> wpq
+//x05 XOR y05 -> grf
+
+//cjb OR kqr -> z18
+//ffh XOR gdw -> fvw
+
+// nwg XOR fsf -> mdb
+// nwg AND fsf -> z22
+
+// nwq, z36
+//y36 AND x36 -> z36
+//svb XOR fsw -> nwq
+
+// === ans ===
+// fvw,grf,mdb,nwq,wpq,z18,z22,z36
+print("p2: " + "fvw,grf,mdb,nwq,wpq,z18,z22,z36");
+
