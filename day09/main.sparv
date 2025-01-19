@@ -7,7 +7,7 @@ fun reverse(list) {
     }
     return res;
 }
-fun lines(s) split(s, "\r\n")
+
 fun to_number(list) {
     var res = [];
     for i in list {
@@ -73,7 +73,6 @@ var p1 = 0;
 while lp <= rp {
     if lp % 2 == 0 {
         while input[lp] > 0 {
-            var points = pos * l_id;
             p1 += pos * l_id;
             pos += 1;
             input[lp] = input[lp]-1;
@@ -82,7 +81,6 @@ while lp <= rp {
     } else {
         while input[lp] > 0 {
             if input[rp] > 0 {
-                var points = r_id * pos;
                 p1 += r_id * pos;
                 pos += 1;
                 input[rp] = input[rp] - 1;

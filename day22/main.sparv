@@ -45,7 +45,7 @@ fun next_secret_number(n, count, all, all_keys) {
 }
 
 var numbers = read_file("day22/in") ->
-    fun(s) split(s, "\r\n");
+    lines;
 
 var p1 = 0;
 var all_keys = [];

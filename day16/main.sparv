@@ -162,9 +162,8 @@ fun solve(state) {
     djik(state.map, state.pos, 0, state.end);
 }
 
-var n = read_file("day16/in") ->
-    fun(s) split(s, "\r\n")->
+read_file("day16/in")->
+    lines->
     parse_state->
     solve;
-
 

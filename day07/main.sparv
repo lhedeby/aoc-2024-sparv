@@ -1,13 +1,12 @@
-fun lines(s) split(s, "\r\n")
 
 fun solve_lines(lines) {
     var p1 = 0;
     var p2 = 0;
     for line in lines {
-        if solve(line, 1, line[1][0], true) {
+        if solve_p1(line, 1, line[1][0]) {
             p1 += line[0];
         }
-        if solve(line, 1, line[1][0], false) {
+        if solve_p2(line, 1, line[1][0]) {
             p2 += line[0];
         }
     }
@@ -15,34 +14,33 @@ fun solve_lines(lines) {
     print("p2: " + p2);
 }
 
-fun solve(line, i, sum, is_p1) {
+fun solve_p1(line, i, sum) {
     if sum > line[0] {
         return false;
     }
     if i == len(line[1]) {
         return sum == line[0];
     }
-    var psum = sum + line[1][i];
-    var plus = solve(
-        line,
-        i + 1,
-        sum + line[1][i],
-        is_p1
-    );
-
-    var msum = sum * line[1][i];
-    var mult = solve(line, i + 1, msum, is_p1);
-
-    if is_p1 {
-        return plus or mult;
-    }
-
-    var csum = parse(sum + "" + line[1][i]);
-    var conc = solve(line, i + 1, csum, is_p1);
-
-    return plus or mult or conc;
+    return 
+        solve_p1(line, i + 1, sum * line[1][i]) or 
+        solve_p1(line, i + 1, sum + line[1][i]);
 }
 
+fun solve_p2(line, i, sum) {
+    if sum > line[0] {
+        return false;
+    }
+    if i == len(line[1]) {
+        return sum == line[0];
+    }
+
+
+    
+    return 
+        solve_p2(line, i + 1, parse(sum + "" + line[1][i])) or
+        solve_p2(line, i + 1, sum * line[1][i]) or
+        solve_p2(line, i + 1, sum + line[1][i]);
+}
 
 fun parse_lines(lines) {
     var res = [];
@@ -62,9 +60,11 @@ fun parse_lines(lines) {
 
 
 
+var start = time();
 
 var input = read_file("day07/in") ->
     lines ->
     parse_lines ->
     solve_lines;
 
+print("time: " + (time()-start) + "ms");

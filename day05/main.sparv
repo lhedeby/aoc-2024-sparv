@@ -1,9 +1,4 @@
-
-var lines = fun(s) {
-    return split(s, "\r\n");
-};
-
-var filter = fun(list) {
+fun filter(list) {
     var rules = [];
     var updates = [];
     for item in list {
@@ -14,18 +9,16 @@ var filter = fun(list) {
         }
     }
     return [rules, updates];
-};
-
-fun map(f) {
-    return fun(list) {
-        for i in 0:len(list) {
-            list[i] = f(list[i]);
-        }
-        return list;
-    };
 }
 
-var map_rules = fun(list) {
+fun map(f) fun(list) {
+    for i in 0:len(list) {
+        list[i] = f(list[i]);
+    }
+    return list;
+}
+
+fun map_rules(list) {
     var mapped_rules = [];
     for item in list[0] {
         var t = split(item, "|")->map(fun(x) parse(x));
@@ -33,9 +26,9 @@ var map_rules = fun(list) {
     }
     list[0] = mapped_rules;
     return list;
-};
+}
 
-var map_updates = fun(list) {
+fun map_updates(list) {
     var mapped_rules = [];
     for item in list[1] {
         var t = split(item, ",")->map(fun(x) parse(x));
@@ -43,9 +36,9 @@ var map_updates = fun(list) {
     }
     list[1] = mapped_rules;
     return list;
-};
+}
 
-var find_idx = fun(n, update) {
+fun find_idx(n, update) {
     var i = 0;
     for u in update {
         if u == n {
@@ -54,16 +47,17 @@ var find_idx = fun(n, update) {
         i += 1;
     }
     return -1;
-};
+}
 
-var test_rule = fun(rule, update) {
+fun test_rule(rule, update) {
     var first = find_idx(rule[0], update);
+    if first == -1 { return true; }
+
     var second = find_idx(rule[1], update);
-    if first == -1 or second == -1 {
-        return true;
-    }
+    if second == -1 { return true; }
+
     return first < second;
-};
+}
 
 fun quicksort(list, lo, hi, rules) {
     if lo >= hi or lo < 0 {
@@ -102,20 +96,24 @@ fun is_less(v1, v2, rules) {
     return false;
 }
 
-var sort_update = fun(update, rules) {
+fun sort_update(update, rules) {
     quicksort(update, 0, len(update)-1, rules);
-};
+}
 
-var solve = fun(list) {
+fun test_rules(lll, update) {
+    for rule in lll {
+        if !test_rule(rule, update) {
+            return false;
+        }
+    }
+    return true;
+}
+
+fun solve(list) {
     var p1 = 0;
     var p2 = 0;
     for update in list[1] {
-        var ok = true;
-        for rule in list[0] {
-            ok = test_rule(rule, update) and ok;
-        }
-
-        if ok {
+        if test_rules(list[0], update) {
             p1 += update[(len(update)-1)/2];
         } else {
             sort_update(update, list[0]);
@@ -124,8 +122,7 @@ var solve = fun(list) {
     }
     print("p1: " + p1);
     print("p2: " + p2);
-};
-
+}
 
 
 
