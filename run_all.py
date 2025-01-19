@@ -11,7 +11,7 @@ import threading
 def main():
     proj_path = "../krax/src/sparv.csproj"
 
-    subprocess.run(["dotnet", "build", proj_path, "-o", "./"], shell=True, capture_output=True)
+    subprocess.run(["dotnet", "build", proj_path,"--configuration", "Release", "-o", "./"], shell=True, capture_output=True)
 
     folders = [x for x in listdir("./") if x.startswith("day")]
 
