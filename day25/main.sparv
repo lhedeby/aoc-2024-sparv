@@ -1,0 +1,53 @@
+fun parse_data(list) {
+    var res = {
+        keys: [],
+        locks: [],
+    };
+    for l in list {
+        var thing = [-1, -1, -1, -1, -1];
+        for ll in l->lines {
+            for i in 0:len(ll) {
+                if ll[i] == "#" {
+                    thing[i] = thing[i] + 1;
+                }
+            }
+        }
+
+        if l[0][0] == "#" {
+            res.locks += [thing];
+        } else {
+            res.keys += [thing];
+        }
+    }
+    return res;
+}
+
+fun test(key, lock) {
+    for i in 0:len(key) {
+        if key[i] + lock[i] >= 6 {
+            return false;
+        }
+    }
+    return true;
+}
+
+fun test_all(o) {
+    var ans = 0;
+    for key in o.keys {
+        for lock in o.locks {
+            if test(key, lock) {
+                ans+=1;
+            }
+        }
+    }
+    return ans;
+}
+
+read_file("day25/in") ->
+    fun(x) split(x, "\r\n\r\n") ->
+    parse_data ->
+    test_all ->
+    fun(ans) print("p1: " + ans);
+
+
+print("p2: done!");
