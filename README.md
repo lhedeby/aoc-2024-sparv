@@ -1,5 +1,24 @@
 # Advent of code 2024 with sparv
 
-Trying to solve aoc 2024 with my own language [sparv](https://github.com/lhedeby/sparv)  
+My solutions for [Advent of code 2024](https://adventofcode.com/2024/) using [sparv](https://github.com/lhedeby/sparv)  
 
-Wish me luck!
+# Python test
+
+The script ```run_all.py``` expects each folder to contain 3 files:
+
+### main.sparv
+The code for the solution.
+
+### in
+The input.
+
+### ans
+The answers on the format:
+```
+p1: <ans1>
+p2: <ans2>
+```
+
+## Actually...
+
+Day 24 part 2 was solved using a sketch in excalidraw. So I'm not sure if this counts...
